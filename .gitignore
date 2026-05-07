@@ -9,6 +9,10 @@ wheels/
 # Virtual environments
 .venv
 
+# Models (too large for GitHub)
+models/*.pkl
+*.pkl
+
 data/
 models/
 
