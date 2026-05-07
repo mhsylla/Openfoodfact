@@ -261,7 +261,32 @@ Notre stratégie d'optimisation repose sur trois piliers complémentaires :
 
 ### 🔍 Matrice de Confusion
 
-La matrice de confusion révèle le comportement du modèle **Random Forest** (meilleur modèle) :
+La matrice de confusion révèle le comportement du modèle **Random Forest** (meilleur modèle).
+
+#### Visualisation de la Matrice
+
+La matrice de confusion est générée dans le notebook (cellule 20) avec le code suivant :
+
+```python
+cm = confusion_matrix(y_test, y_pred)
+target_names = preprocessor.label_encoder.classes_
+
+plt.figure(figsize=(10, 8))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
+            xticklabels=target_names, yticklabels=target_names,
+            cbar_kws={'label': 'Nombre de prédictions'})
+plt.title('Matrice de Confusion - Random Forest\nDataset Clean_2')
+plt.ylabel('Vraie classe')
+plt.xlabel('Classe prédite')
+plt.show()
+```
+
+**Lecture de la matrice** :
+- **Axe vertical (Y)** : Vraie classe (grade réel du produit)
+- **Axe horizontal (X)** : Classe prédite (grade prédit par le modèle)
+- **Diagonale (bleu foncé)** : Prédictions correctes
+- **Hors diagonale (bleu clair)** : Erreurs de classification
+- **Couleur** : Plus c'est foncé, plus il y a de produits
 
 #### Prédictions Correctes (Diagonale)
 
@@ -292,7 +317,32 @@ La matrice de confusion révèle le comportement du modèle **Random Forest** (m
 
 ### 📈 Importance des Features
 
-Le modèle Random Forest révèle quelles variables nutritionnelles influencent le plus la prédiction :
+Le modèle Random Forest révèle quelles variables nutritionnelles influencent le plus la prédiction.
+
+#### Visualisation de l'Importance
+
+L'importance des features est calculée et visualisée dans le notebook (cellule 22) :
+
+```python
+if hasattr(best_model, 'feature_importances_'):
+    importances = best_model.feature_importances_
+    feature_names = X_train.columns
+    
+    feature_importance_df = pd.DataFrame({
+        'Feature': feature_names,
+        'Importance': importances
+    }).sort_values('Importance', ascending=False)
+    
+    # Graphique horizontal (barh) montrant le top 15
+    plt.figure(figsize=(12, 6))
+    top_features = feature_importance_df.head(15)
+    plt.barh(range(len(top_features)), top_features['Importance'], color='steelblue')
+    plt.yticks(range(len(top_features)), top_features['Feature'])
+    plt.xlabel('Importance')
+    plt.title('Top 15 Features - Random Forest - Clean_2')
+    plt.gca().invert_yaxis()
+    plt.show()
+```
 
 #### Top 15 Features par Importance
 
@@ -330,6 +380,34 @@ Le modèle Random Forest révèle quelles variables nutritionnelles influencent 
 ## 7. IV. Évaluation - Résultats
 
 ### 📊 Comparaison XGBoost vs Random Forest
+
+#### Visualisation de la Comparaison
+
+La comparaison des modèles est visualisée dans le notebook (cellule 16) avec deux graphiques côte à côte :
+
+```python
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+# Graphique 1 : Performance (Accuracy et F1-Score Test)
+metrics = ['Accuracy Test', 'F1-Score Test']
+axes[0].bar(x - width/2, [xgb_metrics['test_accuracy'], xgb_metrics['test_f1']], 
+            width, label='XGBoost', color='steelblue')
+axes[0].bar(x + width/2, [rf_metrics['test_accuracy'], rf_metrics['test_f1']], 
+            width, label='Random Forest', color='forestgreen')
+axes[0].set_title('Performance - Clean_2')
+
+# Graphique 2 : Temps d'Entraînement
+axes[1].bar(['XGBoost', 'Random Forest'], 
+            [xgb_metrics['training_time'], rf_metrics['training_time']],
+            color=['steelblue', 'forestgreen'])
+axes[1].set_title('Temps d\'Entraînement')
+```
+
+**Interprétation** :
+- **Graphique gauche** : Random Forest (vert) surpasse XGBoost (bleu) sur les deux métriques
+- **Graphique droite** : XGBoost est 5.8x plus rapide que Random Forest
+
+#### Tableau Comparatif
 
 | Métrique | XGBoost | Random Forest | Meilleur |
 |----------|---------|---------------|----------|
